@@ -476,16 +476,16 @@ This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a> analysi
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjeremymsimonWilliamsRetinascRNAIMPG2workflowrtree69977d1f012674eadcfcaef461b1f0836beb0f9etargetblank69977d1a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/jeremymsimon/Williams_Retina_scRNA_IMPG2_workflowr/tree/69977d1f012674eadcfcaef461b1f0836beb0f9e" target="_blank">69977d1</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjeremymsimonWilliamsRetinascRNAIMPG2workflowrtree9ed74d3f13a4ba02165ca91f04e4575d9649c0e0targetblank9ed74d3a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/jeremymsimon/Williams_Retina_scRNA_IMPG2_workflowr/tree/9ed74d3f13a4ba02165ca91f04e4575d9649c0e0" target="_blank">9ed74d3</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjeremymsimonWilliamsRetinascRNAIMPG2workflowrtree69977d1f012674eadcfcaef461b1f0836beb0f9etargetblank69977d1a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjeremymsimonWilliamsRetinascRNAIMPG2workflowrtree9ed74d3f13a4ba02165ca91f04e4575d9649c0e0targetblank9ed74d3a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/jeremymsimon/Williams_Retina_scRNA_IMPG2_workflowr/tree/69977d1f012674eadcfcaef461b1f0836beb0f9e" target="_blank">69977d1</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/jeremymsimon/Williams_Retina_scRNA_IMPG2_workflowr/tree/9ed74d3f13a4ba02165ca91f04e4575d9649c0e0" target="_blank">9ed74d3</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -534,6 +534,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jeremymsimon/Williams_Retina_scRNA_IMPG2_workflowr/blob/9ed74d3f13a4ba02165ca91f04e4575d9649c0e0/analysis/Peng_macaque_retina_summarized_IMPG1-2_expression_boxplots.Rmd" target="_blank">9ed74d3</a>
+</td>
+<td>
+jeremymsimon
+</td>
+<td>
+2022-10-26
+</td>
+<td>
+Initial commit
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jeremymsimon/Williams_Retina_scRNA_IMPG2_workflowr/146a8454dd768acbc00d1a46f82b30a8e741ac94/docs/Peng_macaque_retina_summarized_IMPG1-2_expression_boxplots.html" target="_blank">146a845</a>
+</td>
+<td>
+jeremymsimon
+</td>
+<td>
+2022-10-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -589,121 +623,118 @@ suppressPackageStartupMessages(library(cowplot))</code></pre>
 <div id="import-metadata" class="section level2">
 <h2>Import metadata</h2>
 <p>Categories are modeled after Fig. 1C in the paper, where clusters are summarized by broader categories</p>
-<pre class="r"><code>meta &lt;- read_csv(&quot;Macaque_NN_RGC_AC_BC_HC_PR_metadata_3.txt&quot;, col_names = c(&quot;CellID&quot;,
-    &quot;Cluster&quot;, &quot;Subcluster&quot;), skip = 2) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;))</code></pre>
+<pre class="r"><code>meta &lt;- read_csv(&quot;Macaque_NN_RGC_AC_BC_HC_PR_metadata_3.txt&quot;, col_names=c(&quot;CellID&quot;,&quot;Cluster&quot;,&quot;Subcluster&quot;), skip=2) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;))</code></pre>
 </div>
 <div id="import-expression-data" class="section level2">
 <h2>Import expression data</h2>
-<pre class="r"><code>Macaque_fov_AC &lt;- read_csv(&quot;Macaque_fov_AC_expression2_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
+<pre class="r"><code>Macaque_fov_AC &lt;- read_csv(&quot;Macaque_fov_AC_expression2_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
     add_column(Category = &quot;Amacrine cells&quot;)
 
-Macaque_fov_BC &lt;- read_csv(&quot;Macaque_fov_BC_expression_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
+Macaque_fov_BC &lt;- read_csv(&quot;Macaque_fov_BC_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
     add_column(Category = &quot;Bipolar cells&quot;)
+    
+Macaque_fov_EpiImmune &lt;- read_csv(&quot;Macaque_fov_EpiImmune_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%    
+    mutate(Category = str_replace_all(Cluster, c(&quot;MG&quot;=&quot;Muller glia&quot;, &quot;Mic&quot;=&quot;Microglia&quot;, &quot;Endo&quot;=&quot;Endothelial&quot;)))
 
-Macaque_fov_EpiImmune &lt;- read_csv(&quot;Macaque_fov_EpiImmune_expression_IMPG1_IMPG2.txt&quot;,
-    name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
-    mutate(Category = str_replace_all(Cluster, c(MG = &quot;Muller glia&quot;, Mic = &quot;Microglia&quot;,
-        Endo = &quot;Endothelial&quot;)))
-
-Macaque_fov_HC &lt;- read_csv(&quot;Macaque_fov_HC_expression_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
+Macaque_fov_HC &lt;- read_csv(&quot;Macaque_fov_HC_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
     add_column(Category = &quot;Horizontal cells&quot;)
 
-Macaque_fov_PR &lt;- read_csv(&quot;Macaque_fov_PR_expression_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
-    mutate(Category = str_replace_all(Cluster, &quot;M/L Cones|S Cones&quot;, &quot;Cones&quot;))
+Macaque_fov_PR &lt;- read_csv(&quot;Macaque_fov_PR_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
+    mutate(Category = str_replace_all(Cluster,&quot;M/L Cones|S Cones&quot;, &quot;Cones&quot;))
 
-Macaque_fov_RGC &lt;- read_csv(&quot;Macaque_fov_RGC_expression_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
+Macaque_fov_RGC &lt;- read_csv(&quot;Macaque_fov_RGC_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
     add_column(Category = &quot;Retinal ganglion cells&quot;)
 
 
-Macaque_per_AC &lt;- read_csv(&quot;Macaque_per_AC_expression_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
+Macaque_per_AC &lt;- read_csv(&quot;Macaque_per_AC_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
     add_column(Category = &quot;Amacrine cells&quot;)
 
-Macaque_per_BC &lt;- read_csv(&quot;Macaque_per_BC_expression2_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
+Macaque_per_BC &lt;- read_csv(&quot;Macaque_per_BC_expression2_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
     add_column(Category = &quot;Bipolar cells&quot;)
+    
+Macaque_per_EpiImmune &lt;- read_csv(&quot;Macaque_per_EpiImmune_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%    
+    mutate(Category = str_replace_all(Cluster, c(&quot;MG&quot;=&quot;Muller glia&quot;, &quot;Mic&quot;=&quot;Microglia&quot;, &quot;Endo&quot;=&quot;Endothelial&quot;)))
 
-Macaque_per_EpiImmune &lt;- read_csv(&quot;Macaque_per_EpiImmune_expression_IMPG1_IMPG2.txt&quot;,
-    name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
-    mutate(Category = str_replace_all(Cluster, c(MG = &quot;Muller glia&quot;, Mic = &quot;Microglia&quot;,
-        Endo = &quot;Endothelial&quot;)))
-
-Macaque_per_HC &lt;- read_csv(&quot;Macaque_per_HC_expression_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
+Macaque_per_HC &lt;- read_csv(&quot;Macaque_per_HC_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
     add_column(Category = &quot;Horizontal cells&quot;)
 
-Macaque_per_PR &lt;- read_csv(&quot;Macaque_per_PR_expression_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
-    mutate(Category = str_replace_all(Cluster, &quot;M/L Cones|S Cones&quot;, &quot;Cones&quot;))
+Macaque_per_PR &lt;- read_csv(&quot;Macaque_per_PR_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
+    mutate(Category = str_replace_all(Cluster,&quot;M/L Cones|S Cones&quot;, &quot;Cones&quot;))
 
-Macaque_per_RGC &lt;- read_csv(&quot;Macaque_per_RGC_expression_IMPG1_IMPG2.txt&quot;, name_repair = &quot;minimal&quot;) %&gt;%
-    pivot_longer(cols = !GENE, names_to = &quot;CellID&quot;, values_to = &quot;Expression&quot;) %&gt;%
-    pivot_wider(names_from = GENE, values_from = Expression) %&gt;%
-    mutate(CellID = str_replace_all(CellID, &quot;-&quot;, &quot;.&quot;)) %&gt;%
-    inner_join(meta, by = &quot;CellID&quot;) %&gt;%
+Macaque_per_RGC &lt;- read_csv(&quot;Macaque_per_RGC_expression_IMPG1_IMPG2.txt&quot;, name_repair=&quot;minimal&quot;) %&gt;%
+    pivot_longer(cols=!GENE,names_to=&quot;CellID&quot;,values_to=&quot;Expression&quot;) %&gt;%
+    pivot_wider(names_from=GENE,values_from=Expression) %&gt;%
+    mutate(CellID = str_replace_all(CellID,&quot;-&quot;,&quot;.&quot;)) %&gt;%
+    inner_join(meta,by=&quot;CellID&quot;) %&gt;%
     add_column(Category = &quot;Retinal ganglion cells&quot;)</code></pre>
-<pre class="r"><code>macaque_all &lt;- bind_rows(Macaque_fov_AC, Macaque_fov_BC, Macaque_fov_EpiImmune, Macaque_fov_HC,
-    Macaque_fov_PR, Macaque_fov_RGC, Macaque_per_AC, Macaque_per_BC, Macaque_per_EpiImmune,
-    Macaque_per_HC, Macaque_per_PR, Macaque_per_RGC)</code></pre>
+<pre class="r"><code>macaque_all &lt;- bind_rows(Macaque_fov_AC,Macaque_fov_BC,Macaque_fov_EpiImmune,Macaque_fov_HC,Macaque_fov_PR,Macaque_fov_RGC,Macaque_per_AC,Macaque_per_BC,Macaque_per_EpiImmune,Macaque_per_HC,Macaque_per_PR,Macaque_per_RGC)</code></pre>
 </div>
 <div id="plot-boxplots-of-impg1-and-impg2-expression" class="section level2">
 <h2>Plot boxplots of IMPG1 and IMPG2 expression</h2>
 <p>Split and color fovea and periphery separately</p>
 <pre class="r"><code>p1 &lt;- macaque_all %&gt;%
     group_by(Category) %&gt;%
-    ggplot(aes(x = reorder(Category, -IMPG2), y = IMPG1, fill = Subcluster)) + geom_boxplot(outlier.shape = NA) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), legend.position = c(0.7,
-        0.8)) + xlab(&quot;Macaque retina cell types&quot;) + ylab(&quot;IMPG1 expression&quot;)
+    ggplot(aes(x=reorder(Category,-IMPG2),y=IMPG1,fill=Subcluster)) +
+    geom_boxplot(outlier.shape = NA) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),legend.position = c(0.7, 0.8)) +
+    xlab(&quot;Macaque retina cell types&quot;) +
+    ylab(&quot;IMPG1 expression&quot;)
 
 p2 &lt;- macaque_all %&gt;%
     group_by(Category) %&gt;%
-    ggplot(aes(x = reorder(Category, -IMPG2), y = IMPG2, fill = Subcluster)) + geom_boxplot(outlier.shape = NA) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), legend.position = c(0.7,
-        0.8)) + xlab(&quot;Macaque retina cell types&quot;) + ylab(&quot;IMPG2 expression&quot;)
+    ggplot(aes(x=reorder(Category,-IMPG2),y=IMPG2,fill=Subcluster)) +
+    geom_boxplot(outlier.shape = NA) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),legend.position = c(0.7, 0.8)) +
+    xlab(&quot;Macaque retina cell types&quot;) +
+    ylab(&quot;IMPG2 expression&quot;)
 
-plot_grid(p1, p2)</code></pre>
-<p><img src="figure/Peng_macaque_retina_summarized_IMPG1-2_expression_boxplots.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+plot_grid(p1,p2)</code></pre>
+<p><img src="figure/Peng_macaque_retina_summarized_IMPG1-2_expression_boxplots.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -747,14 +778,13 @@ loaded via a namespace (and not attached):
 [33] htmltools_0.5.2  tidyselect_1.1.2 fansi_1.0.3      withr_2.5.0     
 [37] crayon_1.5.1     tzdb_0.2.0       dbplyr_2.1.1     later_1.3.0     
 [41] grid_4.1.0       jsonlite_1.8.0   gtable_0.3.0     lifecycle_1.0.1 
-[45] DBI_1.1.2        git2r_0.30.1     magrittr_2.0.2   formatR_1.11    
-[49] scales_1.2.0     vroom_1.5.7      cli_3.3.0        stringi_1.7.6   
-[53] farver_2.1.0     fs_1.5.2         promises_1.2.0.1 xml2_1.3.3      
-[57] bslib_0.3.1      ellipsis_0.3.2   generics_0.1.2   vctrs_0.4.1     
-[61] tools_4.1.0      bit64_4.0.5      glue_1.6.2       hms_1.1.1       
-[65] parallel_4.1.0   processx_3.5.2   fastmap_1.1.0    yaml_2.3.5      
-[69] colorspace_2.0-3 rvest_1.0.2      knitr_1.37       haven_2.4.3     
-[73] sass_0.4.0      </code></pre>
+[45] DBI_1.1.2        git2r_0.30.1     magrittr_2.0.2   scales_1.2.0    
+[49] vroom_1.5.7      cli_3.3.0        stringi_1.7.6    farver_2.1.0    
+[53] fs_1.5.2         promises_1.2.0.1 xml2_1.3.3       bslib_0.3.1     
+[57] ellipsis_0.3.2   generics_0.1.2   vctrs_0.4.1      tools_4.1.0     
+[61] bit64_4.0.5      glue_1.6.2       hms_1.1.1        parallel_4.1.0  
+[65] processx_3.5.2   fastmap_1.1.0    yaml_2.3.5       colorspace_2.0-3
+[69] rvest_1.0.2      knitr_1.37       haven_2.4.3      sass_0.4.0      </code></pre>
 </div>
 </div>
 </div>
