@@ -11,16 +11,16 @@ editor_options:
 # Summary
 This site contains the code and results for the analysis of IMPG1 and IMPG2 expression at the single-cell level in the retina of human, mouse, and macaque, as part of Williams _et al_ 2022 (_manuscript in preparation_)
 
-All the code and results of this analysis are available from GitHub at https://github.com/jeremymsimon/Williams_Retina_scRNA_IMPG2.
+All the code and results of this analysis are available from GitHub at https://github.com/jeremymsimon/Williams_Retina_scRNA_IMPG2_workflowr.
 
 Follow the links below to access different pieces of the analysis.
 
 # Analysis Overview
 
-1. [Human retina, Lukowski et al](Lukowski_human_retina_summarized_IMPG1-2_expression_boxplots.html)
+1. [Human retina, Adult. Data source: Lukowski et al](Lukowski_human_retina_summarized_IMPG1-2_expression_boxplots.html)
 
-2. [Mouse retina, Macosko et al](Macosko_mouse_retina_summarized_IMPG1-2_expression_boxplots.html)
+2. [Mouse retina, P14. Data source: Macosko et al](Macosko_mouse_retina_summarized_IMPG1-2_expression_boxplots.html)
 
-3. [Macaque retina, Peng et al](Peng_macaque_retina_summarized_IMPG1-2_expression_boxplots.html)
+3. [Macaque retina, 3-9yo. Data source: Peng et al](Peng_macaque_retina_summarized_IMPG1-2_expression_boxplots.html)
 
 

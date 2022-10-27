@@ -12,10 +12,7 @@ Single-cell RNA-seq data from the 3-9yo macaque retina corresponding to [Peng et
 Below we additionally annotate the cluster numbers into named cell types based on the information provided in the supplied metadata file
 
 Data were downloaded as follows
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80), tidy=TRUE)
-```
-```{bash, eval=F}
+```{bash, eval=F,tidy.opts=list(width.cutoff=80), tidy=TRUE}
 curl "https://singlecell.broadinstitute.org/single_cell/api/v1/bulk_download/generate_curl_config?accessions=SCP212&auth_code=Z2Yow3ap&directory=all&context=study"  -o cfg.txt; curl -K cfg.txt && rm cfg.$
 ```
 
