@@ -1,0 +1,103 @@
+---
+title: "Macosko: P14 mouse retina"
+output:
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: console
+---
+
+# Data acquisition
+Single-cell RNA-seq data from the P14 mouse retina corresponding to [Macosko et al 2015](https://pubmed.ncbi.nlm.nih.gov/26000488/) were retrieved from GEO accession [GSE63472](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63472).
+A csv file mapping cell barcodes to clusters was additionally downloaded from the [McCarroll lab website](https://mccarrolllab.org/wp-content/uploads/2015/05/retina_clusteridentities.txt).
+Below we additionally annotate the cluster numbers into named cell types based on the information in Fig. 5D
+
+# Analysis of IMPG1 and IMPG2 expression in retinal cell types
+
+## Load libraries
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(cowplot))
+```
+
+## Import metadata
+```{r,echo=F,message=FALSE,warning=FALSE}
+meta <- read_tsv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/CopiedFromLabComp/Macosko_mouse/GSE63472_retina_clusteridentities.txt", col_names = c("CellID", "Cluster")) %>%
+        mutate(Category = case_when(
+                Cluster == 1 ~ "Horizontal cells",
+                Cluster == 2 ~ "Retinal ganglion cells",
+                Cluster %in% 3:23 ~ "Amacrine cells",
+                Cluster == 24 ~ "Rods",
+                Cluster == 25 ~ "Cones",
+                Cluster %in% 26:33 ~ "Bipolar cells",
+                Cluster == 34 ~ "Muller glia",
+                Cluster == 35 ~ "Astrocytes",
+                Cluster == 36 ~ "Fibroblasts",
+                Cluster == 37 ~ "Vascular endothelium",
+                Cluster == 38 ~ "Pericytes",
+                Cluster == 39 ~ "Microglia"
+                )
+        )
+```
+
+```{r,eval=F}
+meta <- read_tsv("GSE63472_retina_clusteridentities.txt", col_names = c("CellID", "Cluster")) %>%
+	mutate(Category = case_when(
+		Cluster == 1 ~ "Horizontal cells",
+		Cluster == 2 ~ "Retinal ganglion cells",
+		Cluster %in% 3:23 ~ "Amacrine cells",
+		Cluster == 24 ~ "Rods",
+		Cluster == 25 ~ "Cones",
+		Cluster %in% 26:33 ~ "Bipolar cells",
+		Cluster == 34 ~ "Muller glia",
+		Cluster == 35 ~ "Astrocytes",
+		Cluster == 36 ~ "Fibroblasts",
+		Cluster == 37 ~ "Vascular endothelium",
+		Cluster == 38 ~ "Pericytes",
+		Cluster == 39 ~ "Microglia"
+		)
+	)
+```
+
+## Filter expression matrix for IMPG1 and IMPG2 expression
+```{bash, eval=F}
+grep -E 'gene|IMPG1|IMPG2' GSE63472_P14Retina_merged_digital_expression.txt > GSE63472_P14Retina_merged_digital_expression_IMPG1-IMPG2.tsv
+```
+
+## Import expression data
+Only retain cells in named clusters
+
+```{r, echo=F,message=FALSE,warning=FALSE}
+mouse.tbl <- read_tsv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/CopiedFromLabComp/Macosko_mouse/GSE63472_P14Retina_merged_digital_expression_IMPGgenes_withHeader.txt", name_repair = "minimal") %>%
+        pivot_longer(cols=!gene,names_to="CellID",values_to="Expression") %>%
+        inner_join(meta,by="CellID") %>%
+        pivot_wider(names_from=gene,values_from=Expression)
+```
+
+```{r, eval=F}
+mouse.tbl <- read_tsv("GSE63472_P14Retina_merged_digital_expression_IMPG1-IMPG2.tsv", name_repair = "minimal") %>%
+	pivot_longer(cols=!gene,names_to="CellID",values_to="Expression") %>%
+	inner_join(meta,by="CellID") %>%
+	pivot_wider(names_from=gene,values_from=Expression)
+```
+
+## Plot boxplots of IMPG1 and IMPG2 expression
+```{r}
+p1 <- mouse.tbl %>%
+	group_by(Category) %>%
+	ggplot(aes(x=reorder(Category,-IMPG2),y=log10(IMPG1+0.1))) +
+	geom_boxplot(outlier.shape = NA) +
+	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),legend.position = c(0.7, 0.8)) +
+	xlab("Mouse retina cell types") +
+	ylab("log10 IMPG1 expression")
+
+p2 <- mouse.tbl %>%
+	group_by(Category) %>%
+	ggplot(aes(x=reorder(Category,-IMPG2),y=log10(IMPG2+0.1))) +
+	geom_boxplot(outlier.shape = NA) +
+	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),legend.position = c(0.7, 0.8)) +
+	xlab("Mouse retina cell types") +
+	ylab("log10 IMPG2 expression")
+
+plot_grid(p1,p2)
+```

@@ -1,0 +1,89 @@
+---
+title: "Lukowski: Adult human retina"
+output:
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: console
+---
+
+# Data acquisition
+Single-cell RNA-seq data from the adult human retina corresponding to [Lukowski et al 2019](https://pubmed.ncbi.nlm.nih.gov/31436334/) were retrieved from [ArrayExpress](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7316/)
+A csv file mapping cell barcodes to clusters was additionally supplied by Sam Lukowski through personal communication in October 2019. 
+
+# Analysis of IMPG1 and IMPG2 expression in retinal cell types
+
+## Load libraries
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(cowplot))
+```
+
+## Import metadata
+```{r, echo=F}
+meta <- read.table("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/CopiedFromLabComp/Lukowski_human/retina_wong_cellbc_cellid.csv",sep=",",header=T,row.names=1)
+colnames(meta) <- c("CellBC","Cluster","ClusterID","CCA Cluster","CCA ClusterID")
+rownames(meta) <- gsub("-",".",rownames(meta))
+```
+
+```{r, eval=F}
+meta <- read.table("retina_wong_cellbc_cellid.csv",sep=",",header=T,row.names=1)
+colnames(meta) <- c("CellBC","Cluster","ClusterID","CCA Cluster","CCA ClusterID")
+rownames(meta) <- gsub("-",".",rownames(meta))
+```
+
+## Filter expression matrix for IMPG1 and IMPG2 expression
+```{bash, eval=F}
+grep -E 'GENE|IMPG1|IMPG2' ae_exp_proc_all.tsv > ae_exp_proc_all_IMPG1_IMPG2.tsv
+```
+
+## Import expression data and establish cell categories
+Note categories are modeled after Fig. 1C in the paper, where clusters are summarized by broader categories
+
+```{r,echo=F}
+human_all <- as.data.frame(t(read.table("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/CopiedFromLabComp/Lukowski_human/ae_exp_proc_all_IMPG1_IMPG2.tsv",header=T,sep="\t",row.names=1,check.names=F)))
+rownames(human_all) <- gsub("-",".",rownames(human_all))
+```
+```{r,eval=F}
+human_all <- as.data.frame(t(read.table("ae_exp_proc_all_IMPG1_IMPG2.tsv",header=T,sep="\t",row.names=1,check.names=F)))
+rownames(human_all) <- gsub("-",".",rownames(human_all))
+```
+```{r}
+cat <- meta[rownames(human_all),2]
+cat <- gsub("Rod PR.+","Rods",cat)
+cat <- gsub("Cone PR.+","Cones",cat)
+cat <- gsub("Bipolar.+","Bipolar cells",cat)
+cat <- gsub("MG.+","Muller glia",cat)
+cat <- gsub("Others.+","Others",cat)
+cat <- gsub("Microglia.+","Microglia",cat)
+cat <- gsub("RGC.+","Retinal ganglion cells",cat)
+cat <- gsub("Horizontal.+","Horizontal cells",cat)
+cat <- gsub("Astrocytes.+","Astrocytes",cat)
+cat <- gsub("Amacrine.+","Amacrine cells",cat)
+human_all$Category <- cat
+
+hum.tbl <- as_tibble(rownames_to_column(human_all,var="Cell"))
+```
+
+## Plot boxplots of IMPG1 and IMPG2 expression
+```{r}
+p1 <- hum.tbl %>%
+	group_by(Category) %>%
+	filter(Category!="Others") %>%
+	ggplot(aes(x=reorder(Category,-IMPG2),y=IMPG1)) +
+	geom_boxplot(outlier.shape = NA) +
+	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),legend.position = c(0.7, 0.8)) +
+	xlab("Human retina cell types") +
+	ylab("IMPG1 expression")
+
+p2 <- hum.tbl %>%
+	group_by(Category) %>%
+	filter(Category!="Others") %>%
+	ggplot(aes(x=reorder(Category,-IMPG2),y=IMPG2)) +
+	geom_boxplot(outlier.shape = NA) +
+	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),legend.position = c(0.7, 0.8)) +
+	xlab("Human retina cell types") +
+	ylab("IMPG2 expression")
+
+plot_grid(p1,p2)
+```

@@ -1,0 +1,260 @@
+---
+title: "Peng: 3-9yo macaque retina"
+output:
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: console
+---
+
+# Data acquisition
+Single-cell RNA-seq data from the 3-9yo macaque retina corresponding to [Peng et al 2019](https://pubmed.ncbi.nlm.nih.gov/30712875/) were retrieved from the [Broad single-cell portal](https://singlecell.broadinstitute.org/single_cell/study/SCP212/molecular-specification-of-retinal-cell-types-underlying-central-and-peripheral-vision-in-primates#).
+Below we additionally annotate the cluster numbers into named cell types based on the information provided in the supplied metadata file
+
+Data were downloaded as follows
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80), tidy=TRUE)
+```
+```{bash, eval=F}
+curl "https://singlecell.broadinstitute.org/single_cell/api/v1/bulk_download/generate_curl_config?accessions=SCP212&auth_code=Z2Yow3ap&directory=all&context=study"  -o cfg.txt; curl -K cfg.txt && rm cfg.$
+```
+
+# Analysis of IMPG1 and IMPG2 expression in retinal cell types
+
+## Filter expression matrices for IMPG1 and IMPG2 expression
+```{bash, eval=F}
+grep -E 'GENE|IMPG1|IMPG2' Macaque_fov_AC_expression2.txt > Macaque_fov_AC_expression2_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_fov_BC_expression.txt > Macaque_fov_BC_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_fov_EpiImmune_expression.txt > Macaque_fov_EpiImmune_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_fov_HC_expression.txt > Macaque_fov_HC_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_fov_PR_expression.txt > Macaque_fov_PR_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_fov_RGC_expression.txt > Macaque_fov_RGC_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_per_AC_expression.txt > Macaque_per_AC_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_per_BC_expression2.txt > Macaque_per_BC_expression2_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_per_EpiImmune_expression.txt > Macaque_per_EpiImmune_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_per_HC_expression.txt > Macaque_per_HC_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_per_PR_expression.txt > Macaque_per_PR_expression_IMPG1_IMPG2.txt
+grep -E 'GENE|IMPG1|IMPG2' Macaque_per_RGC_expression.txt > Macaque_per_RGC_expression_IMPG1_IMPG2.txt
+```
+
+## Load libraries
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(cowplot))
+```
+## Import metadata
+Categories are modeled after Fig. 1C in the paper, where clusters are summarized by broader categories
+
+```{r,echo=F,message=FALSE,warning=FALSE}
+meta <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_NN_RGC_AC_BC_HC_PR_metadata_3.txt", col_names=c("CellID","Cluster","Subcluster"), skip=2) %>%
+        mutate(CellID = str_replace_all(CellID,"-","."))
+```
+
+```{r,eval=F}
+meta <- read_csv("Macaque_NN_RGC_AC_BC_HC_PR_metadata_3.txt", col_names=c("CellID","Cluster","Subcluster"), skip=2) %>%
+	mutate(CellID = str_replace_all(CellID,"-","."))
+```
+
+## Import expression data
+```{r,echo=F,message=FALSE,warning=FALSE}
+Macaque_fov_AC <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_fov_AC_expression2_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Amacrine cells")
+
+Macaque_fov_BC <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_fov_BC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Bipolar cells")
+	
+Macaque_fov_EpiImmune <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_fov_EpiImmune_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%	
+	mutate(Category = str_replace_all(Cluster, c("MG"="Muller glia", "Mic"="Microglia", "Endo"="Endothelial")))
+
+Macaque_fov_HC <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_fov_HC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Horizontal cells")
+
+Macaque_fov_PR <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_fov_PR_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	mutate(Category = str_replace_all(Cluster,"M/L Cones|S Cones", "Cones"))
+
+Macaque_fov_RGC <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_fov_RGC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Retinal ganglion cells")
+
+
+Macaque_per_AC <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_per_AC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Amacrine cells")
+
+Macaque_per_BC <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_per_BC_expression2_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Bipolar cells")
+	
+Macaque_per_EpiImmune <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_per_EpiImmune_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%	
+	mutate(Category = str_replace_all(Cluster, c("MG"="Muller glia", "Mic"="Microglia", "Endo"="Endothelial")))
+
+Macaque_per_HC <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_per_HC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Horizontal cells")
+
+Macaque_per_PR <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_per_PR_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	mutate(Category = str_replace_all(Cluster,"M/L Cones|S Cones", "Cones"))
+
+Macaque_per_RGC <- read_csv("/proj/jmsimon/Philpot/singleCellRetinaAnalysis/Macaque_per_RGC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Retinal ganglion cells")
+
+```
+
+
+```{r,eval=F}
+Macaque_fov_AC <- read_csv("Macaque_fov_AC_expression2_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Amacrine cells")
+
+Macaque_fov_BC <- read_csv("Macaque_fov_BC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Bipolar cells")
+	
+Macaque_fov_EpiImmune <- read_csv("Macaque_fov_EpiImmune_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%	
+	mutate(Category = str_replace_all(Cluster, c("MG"="Muller glia", "Mic"="Microglia", "Endo"="Endothelial")))
+
+Macaque_fov_HC <- read_csv("Macaque_fov_HC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Horizontal cells")
+
+Macaque_fov_PR <- read_csv("Macaque_fov_PR_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	mutate(Category = str_replace_all(Cluster,"M/L Cones|S Cones", "Cones"))
+
+Macaque_fov_RGC <- read_csv("Macaque_fov_RGC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Retinal ganglion cells")
+
+
+Macaque_per_AC <- read_csv("Macaque_per_AC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Amacrine cells")
+
+Macaque_per_BC <- read_csv("Macaque_per_BC_expression2_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Bipolar cells")
+	
+Macaque_per_EpiImmune <- read_csv("Macaque_per_EpiImmune_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%	
+	mutate(Category = str_replace_all(Cluster, c("MG"="Muller glia", "Mic"="Microglia", "Endo"="Endothelial")))
+
+Macaque_per_HC <- read_csv("Macaque_per_HC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Horizontal cells")
+
+Macaque_per_PR <- read_csv("Macaque_per_PR_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	mutate(Category = str_replace_all(Cluster,"M/L Cones|S Cones", "Cones"))
+
+Macaque_per_RGC <- read_csv("Macaque_per_RGC_expression_IMPG1_IMPG2.txt", name_repair="minimal") %>%
+	pivot_longer(cols=!GENE,names_to="CellID",values_to="Expression") %>%
+	pivot_wider(names_from=GENE,values_from=Expression) %>%
+	mutate(CellID = str_replace_all(CellID,"-",".")) %>%
+	inner_join(meta,by="CellID") %>%
+	add_column(Category = "Retinal ganglion cells")
+```
+
+```{r}
+macaque_all <- bind_rows(Macaque_fov_AC,Macaque_fov_BC,Macaque_fov_EpiImmune,Macaque_fov_HC,Macaque_fov_PR,Macaque_fov_RGC,Macaque_per_AC,Macaque_per_BC,Macaque_per_EpiImmune,Macaque_per_HC,Macaque_per_PR,Macaque_per_RGC)
+```
+
+## Plot boxplots of IMPG1 and IMPG2 expression
+Split and color fovea and periphery separately
+
+```{r}
+p1 <- macaque_all %>%
+	group_by(Category) %>%
+	ggplot(aes(x=reorder(Category,-IMPG2),y=IMPG1,fill=Subcluster)) +
+	geom_boxplot(outlier.shape = NA) +
+	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),legend.position = c(0.7, 0.8)) +
+	xlab("Macaque retina cell types") +
+	ylab("IMPG1 expression")
+
+p2 <- macaque_all %>%
+	group_by(Category) %>%
+	ggplot(aes(x=reorder(Category,-IMPG2),y=IMPG2,fill=Subcluster)) +
+	geom_boxplot(outlier.shape = NA) +
+	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),legend.position = c(0.7, 0.8)) +
+	xlab("Macaque retina cell types") +
+	ylab("IMPG2 expression")
+
+plot_grid(p1,p2)
+```
