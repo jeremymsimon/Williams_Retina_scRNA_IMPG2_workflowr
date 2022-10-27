@@ -8,7 +8,8 @@ editor_options:
 ---
 
 # Data acquisition
-Single-cell RNA-seq data from the adult human retina corresponding to [Lukowski et al 2019](https://pubmed.ncbi.nlm.nih.gov/31436334/) were retrieved from [ArrayExpress](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7316/)
+Single-cell RNA-seq data from the adult human retina corresponding to [Lukowski et al 2019](https://pubmed.ncbi.nlm.nih.gov/31436334/) were retrieved from [ArrayExpress](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7316/).
+
 A csv file mapping cell barcodes to clusters was additionally supplied by Sam Lukowski through personal communication in October 2019. 
 
 # Analysis of IMPG1 and IMPG2 expression in retinal cell types
