@@ -1,5 +1,5 @@
 ---
-title: "Home"
+title: "scRNA-seq analysis of IMPG1 and IMPG2 expression in the retina of human, mouse, and macaque"
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
@@ -8,4 +8,19 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+# Summary
+This site contains the code and results for the analysis of IMPG1 and IMPG2 expression at the single-cell level in the retina of human, mouse, and macaque, as part of Williams _et al_ 2022 (_manuscript in preparation_)
+
+All the code and results of this analysis are available from GitHub at https://github.com/jeremymsimon/Williams_Retina_scRNA_IMPG2.
+
+Follow the links below to access different pieces of the analysis.
+
+# Analysis Overview
+
+1. [Human retina, Lukowski et al](Lukowski_human_retina_summarized_IMPG1-2_expression_boxplots.html)
+
+2. [Mouse retina, Macosko et al](Macosko_mouse_retina_summarized_IMPG1-2_expression_boxplots.html)
+
+3. [Macaque retina, Peng et al](Peng_macaque_retina_summarized_IMPG1-2_expression_boxplots.html)
+
+
